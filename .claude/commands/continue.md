@@ -1,0 +1,1 @@
+Review @CLAUDE.md and the docs/memory_bank/ files in preparation for the next task. Also examine the unique properties of this hybrid AdminLTE+React+ShadCN frontend before beginning. Describe for me what I can expect to see and verify as part of the acceptance criteria. If you need ShadCN guidance I have equppied you with shadcn-ui mcp tools.

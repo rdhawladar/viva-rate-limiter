@@ -1,0 +1,21 @@
+{
+  "meta": {
+    "generatedAt": "2025-06-09T20:02:49.568Z",
+    "tasksAnalyzed": 13,
+    "totalTasks": 13,
+    "analysisCount": 13,
+    "thresholdScore": 5,
+    "projectName": "Taskmaster",
+    "usedResearch": false
+  },
+  "complexityAnalysis": [
+    {
+      "taskId": 1,
+      "taskTitle": "Ensure AI-Blocked Messages are Not Sent",
+      "complexityScore": 4,
+      "recommendedSubtasks": 4,
+      "expansionPrompt": "Break this task down into the following steps: 1. Identify the exact code location where messages are dispatched to the server. 2. Integrate the `CuriAI.shouldBlock()` check before the network request. 3. Create and display a temporary 'Message Blocked' notification to the sender if the check returns true. 4. Write unit and integration tests to verify the blocking logic and the notification.",
+      "reasoning": "The core logic is simple, but it touches the critical message sending path and requires a new UI element for user feedback, adding moderate complexity."
+    }
+  ]
+}
