@@ -1,0 +1,131 @@
+# Production Environment Configuration
+app:
+  name: "viva-rate-limiter"
+  version: "1.0.0"
+  environment: "production"
+  debug: false
+
+server:
+  host: "0.0.0.0"
+  port: 8080
+  read_timeout: "10s"
+  write_timeout: "10s"
+  idle_timeout: "30s"
+  shutdown_timeout: "30s"
+
+worker:
+  port: 8081
+  concurrency: 20
+  queues:
+    critical: 12
+    default: 6
+    low: 2
+  strict_priority: true
+
+database:
+  host: "${DB_HOST}"
+  port: 5432
+  user: "${DB_USER}"
+  password: "${DB_PASSWORD}"
+  name: "${DB_NAME}"
+  sslmode: "require"
+  timezone: "UTC"
+  max_open_conns: 50
+  max_idle_conns: 20
+  conn_max_lifetime: "30m"
+  conn_max_idle_time: "15m"
+  auto_migrate: false
+  log_level: "warn"
+
+redis:
+  mode: "cluster"
+  addresses:
+    - "${REDIS_NODE_1}"
+    - "${REDIS_NODE_2}" 
+    - "${REDIS_NODE_3}"
+  password: "${REDIS_PASSWORD}"
+  db: 0
+  pool_size: 200
+  min_idle_conns: 50
+  max_retries: 3
+  retry_delay: "200ms"
+  dial_timeout: "2s"
+  read_timeout: "1s"
+  write_timeout: "1s"
+  pool_timeout: "2s"
+  idle_timeout: "5m"
+
+rate_limiter:
+  default_algorithm: "sliding_window"
+  default_limits:
+    free:
+      requests: 100
+      window: "1h"
+      burst: 5
+    pro:
+      requests: 10000
+      window: "1h"
+      burst: 50
+    enterprise:
+      requests: 100000
+      window: "1h"
+      burst: 500
+  key_prefix: "viva:rl:"
+  cleanup_interval: "5m"
+
+asynq:
+  redis_addr: "${REDIS_NODE_1}"
+  redis_password: "${REDIS_PASSWORD}"
+  redis_db: 1
+  concurrency: 20
+  queues:
+    critical: 12
+    default: 6
+    low: 2
+  strict_priority: true
+  retention_period: "168h"
+  healthcheck_interval: "30s"
+
+metrics:
+  enabled: true
+  path: "/metrics"
+  port: 9090
+  namespace: "viva"
+  subsystem: "ratelimiter"
+
+logging:
+  level: "info"
+  format: "json"
+  output: "stdout"
+  file_path: "/var/log/viva-rate-limiter.log"
+  max_size: 500
+  max_backups: 10
+  max_age: 30
+  compress: true
+
+security:
+  api_key_length: 32
+  hash_cost: 14
+  jwt_secret: "${JWT_SECRET}"
+  jwt_expiry: "24h"
+  cors:
+    allowed_origins: ["${CORS_ORIGINS}"]
+    allowed_methods: ["GET", "POST", "PUT", "DELETE"]
+    allowed_headers: ["Content-Type", "Authorization", "X-API-Key"]
+    allow_credentials: false
+
+alerts:
+  enabled: true
+  thresholds:
+    usage_warning: 75
+    usage_critical: 90
+    rate_limit_violations: 20
+  notifications:
+    webhook_url: "${ALERT_WEBHOOK_URL}"
+    email_enabled: true
+    slack_enabled: true
+
+monitoring:
+  health_check_interval: "10s"
+  metrics_interval: "5s"
+  trace_sample_rate: 0.01

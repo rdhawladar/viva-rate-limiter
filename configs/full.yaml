@@ -1,0 +1,129 @@
+# Full Stack Configuration (with monitoring)
+app:
+  name: "viva-rate-limiter"
+  version: "1.0.0"
+  environment: "development"
+  debug: true
+
+server:
+  host: "localhost"
+  port: 8080
+  read_timeout: "30s"
+  write_timeout: "30s"
+  idle_timeout: "60s"
+  shutdown_timeout: "10s"
+
+worker:
+  port: 8081
+  concurrency: 10
+  queues:
+    critical: 6
+    default: 3
+    low: 1
+  strict_priority: true
+
+database:
+  host: "localhost"
+  port: 5434  # Full stack postgres port
+  user: "viva_user"
+  password: "viva_password"
+  name: "viva_ratelimiter" 
+  sslmode: "disable"
+  timezone: "UTC"
+  max_open_conns: 25
+  max_idle_conns: 10
+  conn_max_lifetime: "1h"
+  conn_max_idle_time: "30m"
+  auto_migrate: true
+  log_level: "info"
+
+redis:
+  mode: "single"
+  addresses:
+    - "localhost:6381"  # Full stack redis port
+  password: ""
+  db: 0
+  pool_size: 100
+  min_idle_conns: 10
+  max_retries: 3
+  retry_delay: "100ms"
+  dial_timeout: "5s"
+  read_timeout: "3s"
+  write_timeout: "3s"
+  pool_timeout: "4s"
+  idle_timeout: "5m"
+
+rate_limiter:
+  default_algorithm: "sliding_window"
+  default_limits:
+    free:
+      requests: 1000
+      window: "1h"
+      burst: 10
+    pro:
+      requests: 10000
+      window: "1h" 
+      burst: 100
+    enterprise:
+      requests: 100000
+      window: "1h"
+      burst: 1000
+  key_prefix: "viva:rl:"
+  cleanup_interval: "1m"
+
+asynq:
+  redis_addr: "localhost:6381"  # Full stack redis port
+  redis_password: ""
+  redis_db: 1
+  concurrency: 10
+  queues:
+    critical: 10
+    default: 8
+    low: 2
+  strict_priority: true
+  retention_period: "168h"
+  healthcheck_interval: "15s"
+
+metrics:
+  enabled: true
+  path: "/metrics"
+  port: 9090
+  namespace: "viva"
+  subsystem: "ratelimiter"
+
+logging:
+  level: "debug"
+  format: "json"
+  output: "stdout"
+  file_path: "logs/viva-rate-limiter.log"
+  max_size: 100
+  max_backups: 5
+  max_age: 30
+  compress: true
+
+security:
+  api_key_length: 32
+  hash_cost: 12
+  jwt_secret: "dev-secret-change-in-production"
+  jwt_expiry: "24h"
+  cors:
+    allowed_origins: ["*"]
+    allowed_methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    allowed_headers: ["*"]
+    allow_credentials: true
+
+alerts:
+  enabled: true
+  thresholds:
+    usage_warning: 80
+    usage_critical: 95
+    rate_limit_violations: 10
+  notifications:
+    webhook_url: ""
+    email_enabled: false
+    slack_enabled: false
+
+monitoring:
+  health_check_interval: "30s"
+  metrics_interval: "10s"
+  trace_sample_rate: 0.1

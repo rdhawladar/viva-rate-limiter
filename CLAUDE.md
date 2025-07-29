@@ -7,6 +7,7 @@ This is a **Rate-Limited API Key Manager** - a production-ready Go system for ma
 - **Language**: Go 1.21+
 - **Status**: Architecture & Documentation Phase (No code implementation yet)
 - **Memory Bank**: Complete documentation in `./docs/memory_bank/`
+- **Project Name**: Viva Rate Limiter (formerly Curi)
 
 ## Essential Commands
 

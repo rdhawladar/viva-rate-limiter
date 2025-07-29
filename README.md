@@ -1,2 +1,2 @@
-# curi-rate-limiter
+# viva-rate-limiter
 

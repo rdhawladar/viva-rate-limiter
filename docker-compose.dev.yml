@@ -1,0 +1,48 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: viva-postgres-dev
+    environment:
+      POSTGRES_DB: viva_ratelimiter
+      POSTGRES_USER: viva_user
+      POSTGRES_PASSWORD: viva_password
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5433:5432"  # Use different port to avoid conflicts
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U viva_user -d viva_ratelimiter"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - viva-dev-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: viva-redis-dev
+    ports:
+      - "6380:6379"  # Use different port to avoid conflicts
+    volumes:
+      - redis_dev_data:/data
+      - ./docker/redis/redis.conf:/etc/redis/redis.conf
+    command: redis-server /etc/redis/redis.conf
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - viva-dev-network
+
+volumes:
+  postgres_dev_data:
+  redis_dev_data:
+
+networks:
+  viva-dev-network:
+    driver: bridge

@@ -1,0 +1,124 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: viva-postgres
+    environment:
+      POSTGRES_DB: viva_ratelimiter
+      POSTGRES_USER: viva_user
+      POSTGRES_PASSWORD: viva_password
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U viva_user -d viva_ratelimiter"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - viva-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: viva-redis
+    ports:
+      - "6381:6379"
+    volumes:
+      - redis_data:/data
+      - ./docker/redis/redis.conf:/etc/redis/redis.conf
+    command: redis-server /etc/redis/redis.conf
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - viva-network
+
+  # Redis Cluster Node 1
+  redis-node-1:
+    image: redis:7-alpine
+    container_name: viva-redis-node-1
+    ports:
+      - "7001:6379"
+    volumes:
+      - redis_node1_data:/data
+    command: redis-server --port 6379 --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --appendonly yes
+    networks:
+      - viva-network
+
+  # Redis Cluster Node 2
+  redis-node-2:
+    image: redis:7-alpine
+    container_name: viva-redis-node-2
+    ports:
+      - "7002:6379"
+    volumes:
+      - redis_node2_data:/data
+    command: redis-server --port 6379 --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --appendonly yes
+    networks:
+      - viva-network
+
+  # Redis Cluster Node 3
+  redis-node-3:
+    image: redis:7-alpine
+    container_name: viva-redis-node-3
+    ports:
+      - "7003:6379"
+    volumes:
+      - redis_node3_data:/data
+    command: redis-server --port 6379 --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --appendonly yes
+    networks:
+      - viva-network
+
+  # Prometheus for Metrics
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: viva-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - viva-network
+
+  # Grafana for Dashboards
+  grafana:
+    image: grafana/grafana:latest
+    container_name: viva-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+      - prometheus
+    networks:
+      - viva-network
+
+volumes:
+  postgres_data:
+  redis_data:
+  redis_node1_data:
+  redis_node2_data:
+  redis_node3_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  viva-network:
+    driver: bridge
