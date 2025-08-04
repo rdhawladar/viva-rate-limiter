@@ -16,6 +16,11 @@ const (
 	AlertTypeBillingOverage     AlertType = "billing_overage"
 	AlertTypeSecurityAlert      AlertType = "security_alert"
 	AlertTypeSystemHealth       AlertType = "system_health"
+	AlertTypeRateLimit          AlertType = "rate_limit"
+	AlertTypeQuotaExceeded      AlertType = "quota_exceeded"
+	AlertTypeAbnormalUsage      AlertType = "abnormal_usage"
+	AlertTypeSystemError        AlertType = "system_error"
+	AlertTypeSecurityIssue      AlertType = "security_issue"
 )
 
 // AlertSeverity represents the severity of an alert
@@ -26,6 +31,7 @@ const (
 	AlertSeverityMedium   AlertSeverity = "medium"
 	AlertSeverityHigh     AlertSeverity = "high"
 	AlertSeverityCritical AlertSeverity = "critical"
+	AlertSeverityInfo     AlertSeverity = "info"
 )
 
 // AlertStatus represents the status of an alert
@@ -40,33 +46,25 @@ const (
 // Alert represents an alert in the system
 type Alert struct {
 	ID          uuid.UUID     `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
-	APIKeyID    *uuid.UUID    `json:"api_key_id,omitempty" gorm:"type:uuid;index"`
+	APIKeyID    uuid.UUID     `json:"api_key_id" gorm:"type:uuid;not null;index"`
 	Type        AlertType     `json:"type" gorm:"type:varchar(50);not null;index"`
 	Severity    AlertSeverity `json:"severity" gorm:"type:varchar(20);not null;index"`
-	Status      AlertStatus   `json:"status" gorm:"type:varchar(20);not null;default:'active';index"`
-	
-	// Alert details
-	Title       string `json:"title" gorm:"not null;size:255"`
-	Message     string `json:"message" gorm:"not null;size:1000"`
-	Description string `json:"description" gorm:"size:2000"`
-	
-	// Threshold information
-	Threshold    *float64 `json:"threshold,omitempty"`
-	CurrentValue *float64 `json:"current_value,omitempty"`
-	Unit         string   `json:"unit" gorm:"size:50"`
+	Message     string        `json:"message" gorm:"not null;size:1000"`
 	
 	// Additional data
 	Metadata map[string]interface{} `json:"metadata" gorm:"type:jsonb"`
-	Tags     []string               `json:"tags" gorm:"type:text[]"`
+	
+	// Resolution info
+	Resolved   bool       `json:"resolved" gorm:"default:false;index"`
+	ResolvedAt *time.Time `json:"resolved_at,omitempty"`
+	ResolvedBy *string    `json:"resolved_by,omitempty" gorm:"size:255"`
 	
 	// Timestamps
-	TriggeredAt *time.Time `json:"triggered_at,omitempty"`
-	ResolvedAt  *time.Time `json:"resolved_at,omitempty"`
-	CreatedAt   time.Time  `json:"created_at"`
-	UpdatedAt   time.Time  `json:"updated_at"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 	
 	// Relations
-	APIKey *APIKey `json:"-" gorm:"foreignKey:APIKeyID"`
+	APIKey APIKey `json:"-" gorm:"foreignKey:APIKeyID"`
 }
 
 // TableName returns the table name for Alert
@@ -79,47 +77,30 @@ func (a *Alert) BeforeCreate(tx *gorm.DB) error {
 	if a.ID == uuid.Nil {
 		a.ID = uuid.New()
 	}
-	if a.TriggeredAt == nil {
-		now := time.Now()
-		a.TriggeredAt = &now
-	}
 	return nil
-}
-
-// IsActive returns true if the alert is active
-func (a *Alert) IsActive() bool {
-	return a.Status == AlertStatusActive
 }
 
 // IsResolved returns true if the alert is resolved
 func (a *Alert) IsResolved() bool {
-	return a.Status == AlertStatusResolved
+	return a.Resolved
 }
 
 // Resolve marks the alert as resolved
-func (a *Alert) Resolve() {
-	a.Status = AlertStatusResolved
+func (a *Alert) Resolve(resolvedBy string) {
+	a.Resolved = true
 	now := time.Now()
 	a.ResolvedAt = &now
-}
-
-// Suppress marks the alert as suppressed
-func (a *Alert) Suppress() {
-	a.Status = AlertStatusSuppressed
+	a.ResolvedBy = &resolvedBy
 }
 
 // GetDurationActive returns how long the alert has been active
 func (a *Alert) GetDurationActive() time.Duration {
-	if a.TriggeredAt == nil {
-		return 0
-	}
-	
 	end := time.Now()
 	if a.ResolvedAt != nil {
 		end = *a.ResolvedAt
 	}
 	
-	return end.Sub(*a.TriggeredAt)
+	return end.Sub(a.CreatedAt)
 }
 
 // IsCritical returns true if the alert is critical

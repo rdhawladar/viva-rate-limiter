@@ -14,6 +14,7 @@ const (
 	APIKeyStatusActive    APIKeyStatus = "active"
 	APIKeyStatusSuspended APIKeyStatus = "suspended"
 	APIKeyStatusRevoked   APIKeyStatus = "revoked"
+	APIKeyStatusExpired   APIKeyStatus = "expired"
 )
 
 // APIKeyTier represents the tier of an API key
@@ -23,6 +24,7 @@ const (
 	APIKeyTierFree       APIKeyTier = "free"
 	APIKeyTierPro        APIKeyTier = "pro"
 	APIKeyTierEnterprise APIKeyTier = "enterprise"
+	APIKeyTierAll        APIKeyTier = "all" // Special value for querying all tiers
 )
 
 // APIKey represents an API key in the system
@@ -45,8 +47,12 @@ type APIKey struct {
 	TeamID     *uuid.UUID `json:"team_id,omitempty" gorm:"type:uuid;index"`
 	
 	// Usage tracking
-	LastUsedAt *time.Time `json:"last_used_at,omitempty"`
+	LastUsedAt *time.Time `json:"last_used_at,omitempty"`	
 	TotalUsage int64      `json:"total_usage" gorm:"default:0"`
+	QuotaLimit int64      `json:"quota_limit" gorm:"default:10000"`
+	
+	// Expiration
+	ExpiresAt  *time.Time `json:"expires_at,omitempty"`
 	
 	// Audit fields
 	CreatedAt time.Time      `json:"created_at"`

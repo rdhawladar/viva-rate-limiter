@@ -16,6 +16,17 @@ const (
 	BillingPeriodStatusProcessing BillingPeriodStatus = "processing"
 )
 
+// PaymentStatus represents the payment status of a billing record
+type PaymentStatus string
+
+const (
+	PaymentStatusPending  PaymentStatus = "pending"
+	PaymentStatusPaid     PaymentStatus = "paid"
+	PaymentStatusOverdue  PaymentStatus = "overdue"
+	PaymentStatusFailed   PaymentStatus = "failed"
+	PaymentStatusRefunded PaymentStatus = "refunded"
+)
+
 // BillingRecord represents a billing record for an API key
 type BillingRecord struct {
 	ID          uuid.UUID           `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
@@ -43,6 +54,10 @@ type BillingRecord struct {
 	OverageAmount   float64 `json:"overage_amount" gorm:"type:decimal(10,4);default:0"`
 	TotalAmount     float64 `json:"total_amount" gorm:"type:decimal(10,4);default:0"`
 	Currency        string  `json:"currency" gorm:"size:3;default:'USD'"`
+	
+	// Payment information
+	PaymentStatus PaymentStatus `json:"payment_status" gorm:"type:varchar(20);default:'pending'"`
+	PaidAt        *time.Time    `json:"paid_at,omitempty"`
 	
 	// Tier information
 	TierAtStart string `json:"tier_at_start" gorm:"size:20"`
