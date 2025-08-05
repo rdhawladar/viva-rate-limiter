@@ -11,11 +11,13 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
 
 	"github.com/viva/rate-limiter/internal/cache"
 	"github.com/viva/rate-limiter/internal/config"
 	"github.com/viva/rate-limiter/internal/controllers"
+	"github.com/viva/rate-limiter/internal/metrics"
 	"github.com/viva/rate-limiter/internal/middleware"
 	"github.com/viva/rate-limiter/internal/models"
 	"github.com/viva/rate-limiter/internal/repositories"
@@ -57,6 +59,10 @@ func main() {
 		}
 		logger.Info("Database migrations completed")
 	}
+
+	// Initialize Prometheus metrics
+	prometheusMetrics := metrics.NewPrometheusMetrics(cfg.Metrics.Namespace, cfg.Metrics.Subsystem)
+	logger.Info("Prometheus metrics initialized")
 
 	// Initialize Redis
 	logger.Info("Connecting to Redis...")
@@ -107,6 +113,7 @@ func main() {
 
 	// Add middleware
 	router.Use(middleware.LoggingMiddleware(logger))
+	router.Use(middleware.MetricsMiddleware(prometheusMetrics))
 	router.Use(middleware.CORSMiddleware())
 	router.Use(middleware.SecurityHeadersMiddleware())
 	router.Use(gin.Recovery())
@@ -115,6 +122,12 @@ func main() {
 	router.GET("/health", healthController.Health)
 	router.GET("/ready", healthController.Ready)
 	router.GET("/live", healthController.Live)
+
+	// Metrics endpoint
+	if cfg.Metrics.Enabled {
+		router.GET(cfg.Metrics.Path, gin.WrapH(promhttp.Handler()))
+		logger.Info("Metrics endpoint enabled", zap.String("path", cfg.Metrics.Path))
+	}
 
 	// API routes with rate limiting
 	v1 := router.Group("/api/v1")

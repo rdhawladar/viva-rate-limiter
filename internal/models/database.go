@@ -104,29 +104,20 @@ func AutoMigrate() error {
 
 // createIndexes creates additional database indexes
 func createIndexes() error {
-	// Usage logs partitioning preparation
-	if err := DB.Exec(`
-		-- Create composite index for usage logs query optimization
-		CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_usage_logs_api_key_timestamp 
-		ON usage_logs (api_key_id, timestamp DESC);
-		
-		-- Create index for rate limit violations
-		CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_rate_violations_processed 
-		ON rate_limit_violations (processed_at) WHERE processed_at IS NULL;
-		
-		-- Create index for billing records period queries
-		CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_billing_records_period 
-		ON billing_records (api_key_id, period_start, period_end);
-		
-		-- Create index for alerts by severity and status
-		CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_alerts_severity_status 
-		ON alerts (severity, status, created_at DESC);
-		
-		-- Create partial index for active API keys
-		CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_api_keys_active 
-		ON api_keys (status, tier) WHERE status = 'active';
-	`).Error; err != nil {
-		return fmt.Errorf("failed to create custom indexes: %w", err)
+	// Create indexes one by one to handle any missing columns gracefully
+	indexes := []string{
+		`CREATE INDEX IF NOT EXISTS idx_usage_logs_api_key_timestamp ON usage_logs (api_key_id, timestamp DESC)`,
+		`CREATE INDEX IF NOT EXISTS idx_rate_violations_processed ON rate_limit_violations (processed_at) WHERE processed_at IS NULL`,
+		`CREATE INDEX IF NOT EXISTS idx_billing_records_period ON billing_records (api_key_id, period_start, period_end)`,
+		`CREATE INDEX IF NOT EXISTS idx_alerts_severity_status ON alerts (severity, created_at DESC)`,
+	}
+	
+	for _, idx := range indexes {
+		// Try to create each index, but don't fail if one fails
+		if err := DB.Exec(idx).Error; err != nil {
+			// Log the error but continue
+			fmt.Printf("Warning: Could not create index: %v\n", err)
+		}
 	}
 
 	return nil
