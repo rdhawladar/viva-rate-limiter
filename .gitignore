@@ -62,5 +62,4 @@ docker-compose.override.yml
 .claude/
 .cursor/    
 .taskmanager/
-project-basic-reference/
 doc/
