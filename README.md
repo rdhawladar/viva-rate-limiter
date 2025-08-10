@@ -2,6 +2,24 @@
 
 A production-ready Go-based API key management system with sophisticated rate limiting capabilities, built for high-performance and scalability.
 
+## Use as a Go Package
+
+You can use the rate limiting functionality in your own Go projects:
+
+```bash
+go get github.com/rdhawladar/viva-rate-limiter/pkg/ratelimit
+```
+
+```go
+import "github.com/rdhawladar/viva-rate-limiter/pkg/ratelimit"
+
+// Create a rate limiter
+limiter := ratelimit.NewSlidingWindow(redis.Client, 1000, time.Hour)
+
+// Check rate limit
+allowed, remaining := limiter.Allow(ctx, "user-key")
+```
+
 ## Features
 
 - **API Key Management**: Secure creation, rotation, and revocation of API keys
@@ -34,7 +52,7 @@ The system follows a microservices architecture with clean separation of concern
 
 ### Clone the repository
 ```bash
-git clone https://github.com/yourusername/viva-rate-limiter.git
+git clone https://github.com/rdhawladar/viva-rate-limiter.git
 cd viva-rate-limiter
 ```
 
@@ -175,6 +193,20 @@ The system is designed for high throughput:
 - Horizontal scaling support
 - Connection pooling for all data stores
 - Optimized batch processing for analytics
+
+### Performance Testing
+The project includes comprehensive k6 load testing scripts in the `/k6` directory:
+- **Load & stress testing** with various user scenarios
+- **Rate limiting accuracy** validation
+- **Redis performance** testing under high load
+
+Run performance tests:
+```bash
+cd k6
+./run_performance_tests.sh
+```
+
+See [k6 Testing Documentation](k6/README.md) for details.
 
 ## Security
 
