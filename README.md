@@ -1,24 +1,84 @@
 # Viva Rate Limiter
 
-A production-ready Go-based API key management system with sophisticated rate limiting capabilities, built for high-performance and scalability.
+[![Go Reference](https://pkg.go.dev/badge/github.com/rdhawladar/viva-rate-limiter/pkg/ratelimit.svg)](https://pkg.go.dev/github.com/rdhawladar/viva-rate-limiter/pkg/ratelimit)
+[![Go Report Card](https://goreportcard.com/badge/github.com/rdhawladar/viva-rate-limiter)](https://goreportcard.com/report/github.com/rdhawladar/viva-rate-limiter)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## Use as a Go Package
+A production-ready Go-based API key management system with sophisticated rate limiting capabilities, built for high-performance and scalability. **Available as a standalone Go package!**
 
-You can use the rate limiting functionality in your own Go projects:
+## 🚀 Quick Start - Use as a Go Package
+
+Viva Rate Limiter is available as a **public Go package** that you can easily integrate into your applications:
+
+### Installation
 
 ```bash
-go get github.com/rdhawladar/viva-rate-limiter/pkg/ratelimit
+go get github.com/rdhawladar/viva-rate-limiter/pkg/ratelimit@latest
 ```
+
+### Basic Usage
 
 ```go
-import "github.com/rdhawladar/viva-rate-limiter/pkg/ratelimit"
+package main
 
-// Create a rate limiter
-limiter := ratelimit.NewSlidingWindow(redis.Client, 1000, time.Hour)
+import (
+    "context"
+    "time"
+    "github.com/rdhawladar/viva-rate-limiter/pkg/ratelimit"
+)
 
-// Check rate limit
-allowed, remaining := limiter.Allow(ctx, "user-key")
+func main() {
+    // Create a memory-based rate limiter (great for single instances)
+    backend := ratelimit.NewMemoryBackend()
+    
+    ctx := context.Background()
+    key := "user-123"
+    window := time.Minute
+    limit := int64(100) // 100 requests per minute
+    
+    // Check if request is allowed
+    count, windowStart, err := backend.Increment(ctx, key, window)
+    if err != nil {
+        // Handle error
+    }
+    
+    if count <= limit {
+        // Request allowed
+        fmt.Printf("Request allowed (count: %d/%d)\n", count, limit)
+    } else {
+        // Rate limit exceeded
+        fmt.Printf("Rate limit exceeded (count: %d/%d)\n", count, limit)
+    }
+}
 ```
+
+### Redis Backend (for distributed systems)
+
+```go
+import (
+    "github.com/redis/go-redis/v9"
+    "github.com/rdhawladar/viva-rate-limiter/pkg/ratelimit"
+)
+
+// Create Redis client
+redisClient := redis.NewClient(&redis.Options{
+    Addr: "localhost:6379",
+})
+
+// Create Redis-backed rate limiter
+backend := ratelimit.NewRedisBackend(redisClient)
+
+// Use the same as memory backend
+count, windowStart, err := backend.Increment(ctx, key, window)
+```
+
+### Package Features
+- ✅ **Memory Backend** - Perfect for single-instance applications
+- ✅ **Redis Backend** - For distributed rate limiting across multiple servers
+- ✅ **Thread-Safe** - Concurrent request handling
+- ✅ **Sliding Window Algorithm** - Accurate rate limiting
+- ✅ **Zero Dependencies** - Minimal external dependencies (only Redis client if using Redis backend)
+- ✅ **Production Ready** - Battle-tested with comprehensive testing
 
 ## Features
 
@@ -150,14 +210,42 @@ rate-limiter/
 │   ├── services/         # Business logic
 │   ├── repositories/     # Data access layer
 │   └── middleware/      # HTTP middleware
-├── pkg/                  # Public packages
-│   ├── ratelimit/       # Rate limiting algorithms
+├── pkg/                  # 📦 PUBLIC GO PACKAGES
+│   ├── ratelimit/       # ⭐ Rate limiting library (public package)
+│   │   ├── limiter.go         # Core interfaces
+│   │   ├── memory_backend.go  # In-memory implementation
+│   │   ├── redis_backend.go   # Redis implementation
+│   │   └── examples/          # Usage examples
 │   └── errors/         # Custom error types
 ├── migrations/          # Database migrations
 ├── configs/            # Environment configs
 ├── docker/             # Docker configurations
+├── k6/                 # Performance testing with k6
 └── docs/              # Documentation
 ```
+
+## 📦 Public Package Documentation
+
+The rate limiting package (`pkg/ratelimit`) is designed as a **standalone Go library** that can be imported and used independently of the full Viva Rate Limiter system.
+
+### Why Use Our Package?
+- **Battle-tested**: Used in production handling millions of requests
+- **Flexible**: Choose between memory or Redis backends
+- **Simple API**: Easy to integrate with just a few lines of code
+- **Well-documented**: Comprehensive examples and documentation
+- **Active maintenance**: Regular updates and improvements
+
+### Package Versions
+- `v0.3.0` - Latest stable release with fixed module paths
+- `v0.2.0` - Added Redis backend support
+- `v0.1.0` - Initial release with memory backend
+
+### More Examples
+Check out the [examples directory](https://github.com/rdhawladar/viva-rate-limiter/tree/main/pkg/ratelimit/examples) for:
+- Basic usage
+- Web server integration
+- Redis configuration
+- Custom backends
 
 ## Configuration
 
