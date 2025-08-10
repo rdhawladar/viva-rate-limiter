@@ -9,7 +9,7 @@ import (
 	"github.com/hibiken/asynq"
 	"go.uber.org/zap"
 
-	"github.com/viva/rate-limiter/internal/services"
+	"github.com/rdhawladar/viva-rate-limiter/internal/services"
 )
 
 // Task type constants

@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 
-	"github.com/viva/rate-limiter/internal/models"
+	"github.com/rdhawladar/viva-rate-limiter/internal/models"
 )
 
 // AlertRepository defines the interface for alert data access

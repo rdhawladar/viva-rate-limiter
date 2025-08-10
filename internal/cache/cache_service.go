@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/viva/rate-limiter/internal/services"
+	"github.com/rdhawladar/viva-rate-limiter/internal/services"
 )
 
 // cacheService implements the services.CacheService interface

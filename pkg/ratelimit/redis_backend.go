@@ -8,7 +8,7 @@ import (
 
 	"github.com/redis/go-redis/v9"
 
-	"github.com/viva/rate-limiter/pkg/errors"
+	"github.com/rdhawladar/viva-rate-limiter/pkg/errors"
 )
 
 // RedisBackend implements the Backend interface using Redis.

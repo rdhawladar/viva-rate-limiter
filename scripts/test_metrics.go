@@ -9,8 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
-	"github.com/viva/rate-limiter/internal/metrics"
-	"github.com/viva/rate-limiter/internal/middleware"
+	"github.com/rdhawladar/viva-rate-limiter/internal/metrics"
+	"github.com/rdhawladar/viva-rate-limiter/internal/middleware"
 )
 
 func main() {

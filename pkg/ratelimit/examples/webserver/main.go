@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/viva/rate-limiter/pkg/ratelimit"
+	"github.com/rdhawladar/viva-rate-limiter/pkg/ratelimit"
 )
 
 type server struct {

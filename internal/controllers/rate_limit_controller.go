@@ -7,8 +7,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/viva/rate-limiter/internal/models"
-	"github.com/viva/rate-limiter/internal/services"
+	"github.com/rdhawladar/viva-rate-limiter/internal/models"
+	"github.com/rdhawladar/viva-rate-limiter/internal/services"
 )
 
 // RateLimitController handles rate limiting endpoints

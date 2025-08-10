@@ -6,7 +6,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/viva/rate-limiter/pkg/errors"
+	"github.com/rdhawladar/viva-rate-limiter/pkg/errors"
 )
 
 // Limiter represents a rate limiter that can check and enforce rate limits.

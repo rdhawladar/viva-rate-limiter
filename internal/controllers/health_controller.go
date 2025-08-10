@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/viva/rate-limiter/internal/cache"
-	"github.com/viva/rate-limiter/internal/models"
+	"github.com/rdhawladar/viva-rate-limiter/internal/cache"
+	"github.com/rdhawladar/viva-rate-limiter/internal/models"
 )
 
 // HealthController handles health check endpoints

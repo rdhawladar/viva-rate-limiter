@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/viva/rate-limiter/internal/metrics"
+	"github.com/rdhawladar/viva-rate-limiter/internal/metrics"
 )
 
 // MetricsMiddleware creates a Gin middleware that records Prometheus metrics

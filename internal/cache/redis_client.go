@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
-	"github.com/viva/rate-limiter/internal/config"
+	"github.com/rdhawladar/viva-rate-limiter/internal/config"
 )
 
 // RedisClient wraps redis.Client with additional functionality

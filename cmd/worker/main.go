@@ -12,12 +12,12 @@ import (
 	"github.com/hibiken/asynq"
 	"go.uber.org/zap"
 
-	"github.com/viva/rate-limiter/internal/cache"
-	"github.com/viva/rate-limiter/internal/config"
-	"github.com/viva/rate-limiter/internal/models"
-	"github.com/viva/rate-limiter/internal/queue"
-	"github.com/viva/rate-limiter/internal/repositories"
-	"github.com/viva/rate-limiter/internal/services"
+	"github.com/rdhawladar/viva-rate-limiter/internal/cache"
+	"github.com/rdhawladar/viva-rate-limiter/internal/config"
+	"github.com/rdhawladar/viva-rate-limiter/internal/models"
+	"github.com/rdhawladar/viva-rate-limiter/internal/queue"
+	"github.com/rdhawladar/viva-rate-limiter/internal/repositories"
+	"github.com/rdhawladar/viva-rate-limiter/internal/services"
 )
 
 func main() {

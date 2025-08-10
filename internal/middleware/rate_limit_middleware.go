@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/viva/rate-limiter/internal/services"
+	"github.com/rdhawladar/viva-rate-limiter/internal/services"
 )
 
 // RateLimitMiddleware creates a middleware for rate limiting

@@ -7,7 +7,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/viva/rate-limiter/pkg/ratelimit"
+	"github.com/rdhawladar/viva-rate-limiter/pkg/ratelimit"
 )
 
 func main() {

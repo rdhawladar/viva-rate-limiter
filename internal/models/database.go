@@ -10,7 +10,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 
-	"github.com/viva/rate-limiter/internal/config"
+	"github.com/rdhawladar/viva-rate-limiter/internal/config"
 )
 
 // DB holds the database connection

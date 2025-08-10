@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/viva/rate-limiter/pkg/errors"
+	"github.com/rdhawladar/viva-rate-limiter/pkg/errors"
 )
 
 // memoryEntry represents a single entry in the memory backend.

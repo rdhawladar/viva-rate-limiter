@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/viva/rate-limiter/internal/models"
-	"github.com/viva/rate-limiter/internal/repositories"
+	"github.com/rdhawladar/viva-rate-limiter/internal/models"
+	"github.com/rdhawladar/viva-rate-limiter/internal/repositories"
 )
 
 // UsageTrackingService defines the interface for usage tracking business logic

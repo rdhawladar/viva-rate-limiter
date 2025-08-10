@@ -14,14 +14,14 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
 
-	"github.com/viva/rate-limiter/internal/cache"
-	"github.com/viva/rate-limiter/internal/config"
-	"github.com/viva/rate-limiter/internal/controllers"
-	"github.com/viva/rate-limiter/internal/metrics"
-	"github.com/viva/rate-limiter/internal/middleware"
-	"github.com/viva/rate-limiter/internal/models"
-	"github.com/viva/rate-limiter/internal/repositories"
-	"github.com/viva/rate-limiter/internal/services"
+	"github.com/rdhawladar/viva-rate-limiter/internal/cache"
+	"github.com/rdhawladar/viva-rate-limiter/internal/config"
+	"github.com/rdhawladar/viva-rate-limiter/internal/controllers"
+	"github.com/rdhawladar/viva-rate-limiter/internal/metrics"
+	"github.com/rdhawladar/viva-rate-limiter/internal/middleware"
+	"github.com/rdhawladar/viva-rate-limiter/internal/models"
+	"github.com/rdhawladar/viva-rate-limiter/internal/repositories"
+	"github.com/rdhawladar/viva-rate-limiter/internal/services"
 )
 
 func main() {

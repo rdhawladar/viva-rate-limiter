@@ -6,8 +6,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/viva/rate-limiter/internal/repositories"
-	"github.com/viva/rate-limiter/internal/services"
+	"github.com/rdhawladar/viva-rate-limiter/internal/repositories"
+	"github.com/rdhawladar/viva-rate-limiter/internal/services"
 )
 
 // APIKeyController handles API key related endpoints
