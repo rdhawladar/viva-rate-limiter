@@ -117,26 +117,44 @@ git clone https://github.com/rdhawladar/viva-rate-limiter.git
 cd viva-rate-limiter
 ```
 
-### Install dependencies
+### Quick Start (Development)
+```bash
+# 1. Start infrastructure services (PostgreSQL + Redis)
+make docker-up
+
+# 2. Run the API server
+make run-api
+
+# 3. Open Swagger UI
+open http://localhost:8080/swagger/index
+```
+
+### Manual Setup
+
+#### Install dependencies
 ```bash
 go mod download
 go mod tidy
 ```
 
-### Set up environment variables
+#### Set up environment variables
 ```bash
 cp .env.example .env
 # Edit .env with your configuration
 ```
 
-### Run with Docker Compose
+#### Run with Docker Compose
 ```bash
-docker-compose up -d
+# Development setup (PostgreSQL + Redis only)
+make docker-up
+
+# OR Full setup with monitoring (PostgreSQL + Redis + Prometheus + Grafana)
+make docker-up-full
 ```
 
-### Run database migrations
+#### Run the API
 ```bash
-migrate -path migrations -database "postgresql://user:pass@localhost/ratelimiter?sslmode=disable" up
+make run-api
 ```
 
 ## Development
@@ -178,7 +196,7 @@ go mod audit
 
 ### 📖 Interactive API Documentation
 
-**Swagger UI is available at:** http://localhost:8090/swagger/
+**Swagger UI is available at:** http://localhost:8080/swagger/index
 
 The interactive documentation includes:
 - Complete API endpoint reference
@@ -191,7 +209,7 @@ The interactive documentation includes:
 
 #### Create an API Key
 ```bash
-curl -X POST http://localhost:8090/api/v1/api-keys \
+curl -X POST http://localhost:8080/api/v1/api-keys \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_ADMIN_TOKEN" \
   -d '{
@@ -203,17 +221,17 @@ curl -X POST http://localhost:8090/api/v1/api-keys \
 
 #### Check Rate Limit
 ```bash
-curl -X POST http://localhost:8090/api/v1/rate-limit/check \
+curl -X POST http://localhost:8080/api/v1/rate-limit/check \
   -H "X-API-Key: YOUR_API_KEY"
 ```
 
 #### Get Usage Statistics
 ```bash
-curl -X GET http://localhost:8090/api/v1/api-keys/{key_id}/stats \
+curl -X GET http://localhost:8080/api/v1/api-keys/{key_id}/stats \
   -H "Authorization: Bearer YOUR_ADMIN_TOKEN"
 ```
 
-> 💡 **Tip**: Use the interactive Swagger UI at `/swagger/` to explore all available endpoints and test them directly from your browser.
+> 💡 **Tip**: Use the interactive Swagger UI at `/swagger/index` to explore all available endpoints and test them directly from your browser.
 
 ## Project Structure
 
@@ -311,6 +329,20 @@ cd k6
 ```
 
 See [k6 Testing Documentation](k6/README.md) for details.
+
+## Service Ports
+
+### Development Mode (`make docker-up`)
+- **API Server**: http://localhost:8080
+- **PostgreSQL**: localhost:5433
+- **Redis**: localhost:6380
+
+### Full Mode (`make docker-up-full`)
+- **API Server**: http://localhost:8080
+- **PostgreSQL**: localhost:5434
+- **Redis**: localhost:6381
+- **Prometheus**: http://localhost:9090
+- **Grafana**: http://localhost:3001 (admin/admin)
 
 ## Security
 

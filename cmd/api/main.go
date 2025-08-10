@@ -126,8 +126,8 @@ func main() {
 
 	// Swagger documentation endpoints (no rate limiting)
 	router.GET("/swagger", swaggerController.ServeSwaggerRedirect)
+	router.GET("/openapi.yaml", swaggerController.ServeOpenAPISpec)
 	router.GET("/swagger/*any", swaggerController.ServeSwaggerUI())
-	router.GET("/swagger/openapi.yaml", swaggerController.ServeOpenAPISpec)
 	logger.Info("Swagger UI enabled at /swagger/")
 
 	// Metrics endpoint

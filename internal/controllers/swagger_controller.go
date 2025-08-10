@@ -6,8 +6,6 @@ import (
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 type SwaggerController struct{}
@@ -18,7 +16,10 @@ func NewSwaggerController() *SwaggerController {
 
 // ServeSwaggerUI serves the Swagger UI interface
 func (sc *SwaggerController) ServeSwaggerUI() gin.HandlerFunc {
-	return ginSwagger.WrapHandler(swaggerFiles.Handler, ginSwagger.URL("/swagger/openapi.yaml"))
+	return func(c *gin.Context) {
+		c.Header("Content-Type", "text/html; charset=utf-8")
+		c.String(http.StatusOK, SwaggerHTML)
+	}
 }
 
 // ServeOpenAPISpec serves the OpenAPI specification
