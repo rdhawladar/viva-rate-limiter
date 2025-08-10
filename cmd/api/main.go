@@ -101,6 +101,7 @@ func main() {
 	healthController := controllers.NewHealthController(redisClient)
 	apiKeyController := controllers.NewAPIKeyController(apiKeyService)
 	rateLimitController := controllers.NewRateLimitController(rateLimitService, apiKeyService)
+	swaggerController := controllers.NewSwaggerController()
 
 	logger.Info("Controllers initialized")
 
@@ -122,6 +123,12 @@ func main() {
 	router.GET("/health", healthController.Health)
 	router.GET("/ready", healthController.Ready)
 	router.GET("/live", healthController.Live)
+
+	// Swagger documentation endpoints (no rate limiting)
+	router.GET("/swagger", swaggerController.ServeSwaggerRedirect)
+	router.GET("/swagger/*any", swaggerController.ServeSwaggerUI())
+	router.GET("/swagger/openapi.yaml", swaggerController.ServeOpenAPISpec)
+	logger.Info("Swagger UI enabled at /swagger/")
 
 	// Metrics endpoint
 	if cfg.Metrics.Enabled {

@@ -88,6 +88,7 @@ count, windowStart, err := backend.Increment(ctx, key, window)
 - **Real-time Usage Tracking**: Monitor API usage with detailed metrics and analytics
 - **Automated Billing**: Usage-based billing with overage handling
 - **High Availability**: PostgreSQL with read replicas and Redis sharding
+- **Interactive API Documentation**: Built-in Swagger UI for easy API exploration
 - **Observability**: Prometheus metrics, structured logging, and custom alerting
 
 ## Architecture
@@ -175,9 +176,22 @@ go mod audit
 
 ## API Usage
 
-### Create an API Key
+### 📖 Interactive API Documentation
+
+**Swagger UI is available at:** http://localhost:8090/swagger/
+
+The interactive documentation includes:
+- Complete API endpoint reference
+- Request/response schemas
+- Try-it-out functionality
+- Authentication examples
+- Rate limiting information
+
+### Quick API Examples
+
+#### Create an API Key
 ```bash
-curl -X POST http://localhost:8080/api/v1/keys \
+curl -X POST http://localhost:8090/api/v1/api-keys \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_ADMIN_TOKEN" \
   -d '{
@@ -187,17 +201,19 @@ curl -X POST http://localhost:8080/api/v1/keys \
   }'
 ```
 
-### Check Rate Limit
+#### Check Rate Limit
 ```bash
-curl -X POST http://localhost:8080/api/v1/rate-limit/check \
+curl -X POST http://localhost:8090/api/v1/rate-limit/check \
   -H "X-API-Key: YOUR_API_KEY"
 ```
 
-### Get Usage Statistics
+#### Get Usage Statistics
 ```bash
-curl -X GET http://localhost:8080/api/v1/keys/{key_id}/usage \
+curl -X GET http://localhost:8090/api/v1/api-keys/{key_id}/stats \
   -H "Authorization: Bearer YOUR_ADMIN_TOKEN"
 ```
+
+> 💡 **Tip**: Use the interactive Swagger UI at `/swagger/` to explore all available endpoints and test them directly from your browser.
 
 ## Project Structure
 
