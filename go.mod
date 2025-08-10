@@ -1,4 +1,4 @@
-module github.com/viva/rate-limiter
+module github.com/rdhawladar/viva-rate-limiter
 
 go 1.21
 

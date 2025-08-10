@@ -1,0 +1,922 @@
+openapi: 3.0.3
+info:
+  title: Viva Rate Limiter API
+  description: |
+    A comprehensive rate limiting and API key management service.
+    
+    ## Features
+    - Sliding window rate limiting algorithm  
+    - Multiple tier support (Free, Standard, Pro)
+    - Real-time usage tracking and analytics
+    - Redis-backed distributed rate limiting
+    - Prometheus metrics integration
+    
+    ## Authentication
+    Most endpoints require authentication using an API key in the `X-API-Key` header.
+    
+    ## Rate Limiting
+    All responses include rate limiting headers:
+    - `X-RateLimit-Limit`: Maximum requests allowed
+    - `X-RateLimit-Remaining`: Requests remaining in current window
+    - `X-RateLimit-Reset`: Unix timestamp when the rate limit resets
+    
+  version: 1.0.0
+  contact:
+    name: Viva Rate Limiter Support
+    email: support@viva-rate-limiter.com
+    url: https://github.com/viva/rate-limiter
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8090
+    description: Development server
+  - url: https://api.viva-rate-limiter.com
+    description: Production server
+
+security:
+  - ApiKeyAuth: []
+
+paths:
+  /health:
+    get:
+      summary: Health Check
+      description: Check the health status of the API and its dependencies
+      operationId: healthCheck
+      security: []
+      tags:
+        - Health
+      responses:
+        '200':
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: API is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/api-keys:
+    get:
+      summary: List API Keys
+      description: Get a paginated list of API keys
+      operationId: listApiKeys
+      tags:
+        - API Keys
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: status
+          in: query
+          description: Filter by status
+          schema:
+            type: string
+            enum: [active, suspended, revoked]
+        - name: tier
+          in: query
+          description: Filter by tier
+          schema:
+            type: string
+            enum: [free, standard, pro]
+      responses:
+        '200':
+          description: List of API keys
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKeyListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+    post:
+      summary: Create API Key
+      description: Create a new API key
+      operationId: createApiKey
+      tags:
+        - API Keys
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateApiKeyRequest'
+      responses:
+        '201':
+          description: API key created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKeyResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /api/v1/api-keys/{id}:
+    get:
+      summary: Get API Key
+      description: Get details of a specific API key by ID
+      operationId: getApiKey
+      tags:
+        - API Keys
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: API key UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: API key details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKeyDetailResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+    put:
+      summary: Update API Key
+      description: Update an existing API key
+      operationId: updateApiKey
+      tags:
+        - API Keys
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: API key UUID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateApiKeyRequest'
+      responses:
+        '200':
+          description: API key updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKeyResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+    delete:
+      summary: Delete API Key
+      description: Permanently delete an API key
+      operationId: deleteApiKey
+      tags:
+        - API Keys
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: API key UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: API key deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /api/v1/api-keys/by-key/{apiKey}:
+    get:
+      summary: Get API Key by Key
+      description: Get API key details using the actual key value
+      operationId: getApiKeyByKey
+      tags:
+        - API Keys
+      parameters:
+        - name: apiKey
+          in: path
+          required: true
+          description: The actual API key string
+          schema:
+            type: string
+      responses:
+        '200':
+          description: API key details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKeyDetailResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /api/public/v1/rate-limit/validate:
+    post:
+      summary: Validate Rate Limit
+      description: Check if requests are allowed for an API key (primary rate limiting endpoint)
+      operationId: validateRateLimit
+      security: []
+      tags:
+        - Rate Limiting
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ValidateRateLimitRequest'
+      responses:
+        '200':
+          description: Request is allowed
+          headers:
+            X-RateLimit-Limit:
+              schema:
+                type: integer
+              description: Maximum requests allowed in the time window
+            X-RateLimit-Remaining:
+              schema:
+                type: integer
+              description: Requests remaining in current window
+            X-RateLimit-Reset:
+              schema:
+                type: integer
+              description: Unix timestamp when the rate limit resets
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateLimitAllowedResponse'
+        '429':
+          description: Rate limit exceeded
+          headers:
+            X-RateLimit-Limit:
+              schema:
+                type: integer
+            X-RateLimit-Remaining:
+              schema:
+                type: integer
+            X-RateLimit-Reset:
+              schema:
+                type: integer
+            Retry-After:
+              schema:
+                type: integer
+              description: Seconds to wait before retrying
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateLimitExceededResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+
+  /api/v1/rate-limit/info:
+    get:
+      summary: Get Rate Limit Info
+      description: Get current rate limit status for the authenticated API key
+      operationId: getRateLimitInfo
+      tags:
+        - Rate Limiting
+      responses:
+        '200':
+          description: Rate limit information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateLimitInfoResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /api/v1/rate-limit/reset:
+    post:
+      summary: Reset Rate Limit
+      description: Reset rate limit counter for an API key (admin only)
+      operationId: resetRateLimit
+      tags:
+        - Rate Limiting
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetRateLimitRequest'
+      responses:
+        '200':
+          description: Rate limit reset successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateLimitResetResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /api/v1/usage/{apiKey}/current:
+    get:
+      summary: Get Current Usage
+      description: Get current billing period usage for an API key
+      operationId: getCurrentUsage
+      tags:
+        - Usage Tracking
+      parameters:
+        - name: apiKey
+          in: path
+          required: true
+          description: API key to get usage for
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Current usage information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrentUsageResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /api/v1/usage/{apiKey}/history:
+    get:
+      summary: Get Usage History
+      description: Get historical usage data for an API key
+      operationId: getUsageHistory
+      tags:
+        - Usage Tracking
+      parameters:
+        - name: apiKey
+          in: path
+          required: true
+          description: API key to get usage history for
+          schema:
+            type: string
+        - name: start_date
+          in: query
+          description: Start date (YYYY-MM-DD)
+          schema:
+            type: string
+            format: date
+        - name: end_date
+          in: query
+          description: End date (YYYY-MM-DD)
+          schema:
+            type: string
+            format: date
+        - name: granularity
+          in: query
+          description: Data granularity
+          schema:
+            type: string
+            enum: [hourly, daily, monthly]
+            default: daily
+      responses:
+        '200':
+          description: Usage history data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsageHistoryResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /metrics:
+    get:
+      summary: Prometheus Metrics
+      description: Get metrics in Prometheus format
+      operationId: getMetrics
+      security: []
+      tags:
+        - Metrics
+      responses:
+        '200':
+          description: Prometheus metrics
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: |
+                  # HELP http_requests_total Total number of HTTP requests
+                  # TYPE http_requests_total counter
+                  http_requests_total{method="GET",status="200"} 12345
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+
+  schemas:
+    # Health
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+        timestamp:
+          type: string
+          format: date-time
+        services:
+          type: object
+          properties:
+            database:
+              type: string
+              enum: [healthy, unhealthy]
+            redis:
+              type: string
+              enum: [healthy, unhealthy]
+
+    # API Keys
+    CreateApiKeyRequest:
+      type: object
+      required:
+        - name
+        - tier
+      properties:
+        name:
+          type: string
+          description: Display name for the API key
+          minLength: 1
+          maxLength: 100
+        tier:
+          type: string
+          enum: [free, standard, pro]
+          description: API key tier
+        description:
+          type: string
+          description: Optional description
+          maxLength: 500
+        metadata:
+          type: object
+          description: Custom metadata
+          additionalProperties: true
+
+    UpdateApiKeyRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        status:
+          type: string
+          enum: [active, suspended, revoked]
+        metadata:
+          type: object
+          additionalProperties: true
+
+    ApiKeyResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/ApiKey'
+
+    ApiKeyListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApiKeyListItem'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    ApiKeyDetailResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/ApiKeyDetail'
+
+    ApiKey:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        key:
+          type: string
+          description: The actual API key (only shown on creation)
+        name:
+          type: string
+        tier:
+          type: string
+          enum: [free, standard, pro]
+        status:
+          type: string
+          enum: [active, suspended, revoked]
+        rate_limit:
+          type: integer
+        rate_limit_window:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        metadata:
+          type: object
+          additionalProperties: true
+
+    ApiKeyListItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        tier:
+          type: string
+          enum: [free, standard, pro]
+        status:
+          type: string
+          enum: [active, suspended, revoked]
+        rate_limit:
+          type: integer
+        rate_limit_window:
+          type: string
+        last_used_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+
+    ApiKeyDetail:
+      allOf:
+        - $ref: '#/components/schemas/ApiKey'
+        - type: object
+          properties:
+            key_hash:
+              type: string
+              description: SHA256 hash of the API key
+            last_used_at:
+              type: string
+              format: date-time
+              nullable: true
+            usage_stats:
+              type: object
+              properties:
+                total_requests:
+                  type: integer
+                requests_this_month:
+                  type: integer
+                requests_today:
+                  type: integer
+
+    # Rate Limiting
+    ValidateRateLimitRequest:
+      type: object
+      required:
+        - api_key
+      properties:
+        api_key:
+          type: string
+          description: The API key to validate
+        requests:
+          type: integer
+          minimum: 1
+          default: 1
+          description: Number of requests to validate
+
+    RateLimitAllowedResponse:
+      type: object
+      properties:
+        allowed:
+          type: boolean
+          example: true
+        limit:
+          type: integer
+          example: 1000
+        remaining:
+          type: integer
+          example: 999
+        reset_time:
+          type: string
+          format: date-time
+        reset_in_seconds:
+          type: integer
+          example: 3540
+
+    RateLimitExceededResponse:
+      type: object
+      properties:
+        allowed:
+          type: boolean
+          example: false
+        limit:
+          type: integer
+          example: 1000
+        remaining:
+          type: integer
+          example: 0
+        reset_time:
+          type: string
+          format: date-time
+        reset_in_seconds:
+          type: integer
+          example: 1800
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+
+    RateLimitInfoResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            key:
+              type: string
+            limit:
+              type: integer
+            remaining:
+              type: integer
+            used:
+              type: integer
+            window:
+              type: string
+            window_start:
+              type: string
+              format: date-time
+            window_end:
+              type: string
+              format: date-time
+            reset_time:
+              type: string
+              format: date-time
+            retry_after:
+              type: integer
+
+    ResetRateLimitRequest:
+      type: object
+      required:
+        - api_key
+      properties:
+        api_key:
+          type: string
+
+    RateLimitResetResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        data:
+          type: object
+          properties:
+            key:
+              type: string
+            limit:
+              type: integer
+            remaining:
+              type: integer
+            used:
+              type: integer
+
+    # Usage Tracking
+    CurrentUsageResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            api_key:
+              type: string
+            billing_period:
+              type: object
+              properties:
+                start:
+                  type: string
+                  format: date-time
+                end:
+                  type: string
+                  format: date-time
+            requests_made:
+              type: integer
+            requests_limit:
+              type: integer
+            requests_remaining:
+              type: integer
+            overage_requests:
+              type: integer
+            estimated_cost:
+              type: number
+              format: float
+            currency:
+              type: string
+
+    UsageHistoryResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            api_key:
+              type: string
+            period:
+              type: object
+              properties:
+                start:
+                  type: string
+                  format: date-time
+                end:
+                  type: string
+                  format: date-time
+            granularity:
+              type: string
+              enum: [hourly, daily, monthly]
+            usage:
+              type: array
+              items:
+                type: object
+                properties:
+                  date:
+                    type: string
+                    format: date
+                  requests:
+                    type: integer
+                  successful:
+                    type: integer
+                  rate_limited:
+                    type: integer
+                  errors:
+                    type: integer
+            summary:
+              type: object
+              properties:
+                total_requests:
+                  type: integer
+                total_successful:
+                  type: integer
+                total_rate_limited:
+                  type: integer
+                total_errors:
+                  type: integer
+                average_daily:
+                  type: integer
+
+    # Common
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        pages:
+          type: integer
+
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+
+    ErrorDetail:
+      type: object
+      properties:
+        code:
+          type: string
+          example: RATE_LIMIT_EXCEEDED
+        message:
+          type: string
+          example: Rate limit exceeded for this API key
+        details:
+          type: object
+          additionalProperties: true
+
+  responses:
+    BadRequestError:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: INVALID_REQUEST
+              message: Invalid request parameters
+
+    UnauthorizedError:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: INVALID_API_KEY
+              message: API key is invalid or missing
+
+    ForbiddenError:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: INSUFFICIENT_PERMISSIONS
+              message: Insufficient permissions for this operation
+
+    NotFoundError:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: NOT_FOUND
+              message: Resource not found
+
+  examples:
+    CreateFreeApiKey:
+      summary: Create Free Tier API Key
+      value:
+        name: My Free App
+        tier: free
+        description: API key for my personal project
+
+    CreateStandardApiKey:
+      summary: Create Standard Tier API Key
+      value:
+        name: Production App
+        tier: standard
+        description: API key for production application
+        metadata:
+          app_id: "12345"
+          environment: production
+
+    ValidateRateLimit:
+      summary: Basic Rate Limit Validation
+      value:
+        api_key: viva_live_sk_a1b2c3d4e5f6...
+        requests: 1
+
+    ValidateBulkRequests:
+      summary: Bulk Rate Limit Validation
+      value:
+        api_key: viva_live_sk_a1b2c3d4e5f6...
+        requests: 10
+
+tags:
+  - name: Health
+    description: Health check endpoints
+  - name: API Keys
+    description: API key management operations
+  - name: Rate Limiting
+    description: Rate limiting validation and management
+  - name: Usage Tracking
+    description: Usage analytics and tracking
+  - name: Metrics
+    description: System metrics and monitoring

@@ -3,7 +3,7 @@
 ## Phase 1: Project Foundation & Core Setup (Week 1)
 
 ### 1.1 Project Initialization
-- [ ] Initialize Go module (`go mod init github.com/yourusername/rate-limiter`)
+- [ ] Initialize Go module (`go mod init github.com/rdhawladar/rate-limiter`)
 - [ ] Create project directory structure as per architecture
 - [ ] Set up `.gitignore` for Go projects
 - [ ] Create Makefile with common commands (build, test, run, lint)
