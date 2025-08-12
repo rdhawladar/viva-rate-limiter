@@ -84,12 +84,17 @@ jobs:
         IMAGE_TAG: ${{ github.sha }}
         ENVIRONMENT: ${{ needs.set-environment.outputs.environment }}
       run: |
-        # Apply environment-specific configuration
-        kubectl apply -f k8s/base/
-        kubectl apply -f k8s/environments/$ENVIRONMENT/
+        # Create namespace first
+        kubectl apply -f k8s/environments/$ENVIRONMENT/namespace.yaml
         
-        # Update image in deployment
+        # Create config map from k8s-specific config file
+        kubectl create configmap viva-app-config --from-file=dev.yaml=configs/k8s-dev.yaml -n $ENVIRONMENT --dry-run=client -o yaml | kubectl apply -f -
+        
+        # Apply all resources using kustomize
+        kubectl apply -k k8s/environments/$ENVIRONMENT/
+        
+        # Update image in deployment with specific tag
         kubectl set image deployment/viva-api viva-api=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -n $ENVIRONMENT
         
         # Wait for rollout to complete
-        kubectl rollout status deployment/viva-api -n $ENVIRONMENT
+        kubectl rollout status deployment/viva-api -n $ENVIRONMENT --timeout=300s
