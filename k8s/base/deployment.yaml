@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: viva-api
+spec:
+  selector:
+    matchLabels:
+      app: viva-api
+  template:
+    metadata:
+      labels:
+        app: viva-api
+    spec:
+      containers:
+      - name: viva-api
+        image: 248158220667.dkr.ecr.ap-southeast-1.amazonaws.com/viva-rate-limiter:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: PORT
+          value: "8080"
+        envFrom:
+        - configMapRef:
+            name: viva-config
+        - secretRef:
+            name: viva-secrets
+        volumeMounts:
+        - name: config-volume
+          mountPath: /root/configs
+          readOnly: true
+      volumes:
+      - name: config-volume
+        configMap:
+          name: viva-app-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: viva-api-service
+spec:
+  selector:
+    app: viva-api
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: LoadBalancer

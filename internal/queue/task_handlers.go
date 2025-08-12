@@ -24,21 +24,21 @@ const (
 
 // TaskHandlers contains all task handler implementations
 type TaskHandlers struct {
-	apiKeyService        *services.APIKeyService
-	rateLimitService     *services.RateLimitService
-	usageTrackingService *services.UsageTrackingService
-	alertService         *services.AlertService
-	billingService       *services.BillingService
+	apiKeyService        services.APIKeyService
+	rateLimitService     services.RateLimitService
+	usageTrackingService services.UsageTrackingService
+	alertService         services.AlertService
+	billingService       services.BillingService
 	logger               *zap.Logger
 }
 
 // NewTaskHandlers creates a new instance of TaskHandlers
 func NewTaskHandlers(
-	apiKeyService *services.APIKeyService,
-	rateLimitService *services.RateLimitService,
-	usageTrackingService *services.UsageTrackingService,
-	alertService *services.AlertService,
-	billingService *services.BillingService,
+	apiKeyService services.APIKeyService,
+	rateLimitService services.RateLimitService,
+	usageTrackingService services.UsageTrackingService,
+	alertService services.AlertService,
+	billingService services.BillingService,
 	logger *zap.Logger,
 ) *TaskHandlers {
 	return &TaskHandlers{

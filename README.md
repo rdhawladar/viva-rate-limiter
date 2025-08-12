@@ -6,6 +6,8 @@
 
 A production-ready Go-based API key management system with sophisticated rate limiting capabilities, built for high-performance and scalability. **Available as a standalone Go package!**
 
+<!-- Test deployment $(date): GitHub Actions automated deployment test for dev environment -->
+
 ## 🚀 Quick Start - Use as a Go Package
 
 Viva Rate Limiter is available as a **public Go package** that you can easily integrate into your applications:
@@ -90,6 +92,27 @@ count, windowStart, err := backend.Increment(ctx, key, window)
 - **High Availability**: PostgreSQL with read replicas and Redis sharding
 - **Interactive API Documentation**: Built-in Swagger UI for easy API exploration
 - **Observability**: Prometheus metrics, structured logging, and custom alerting
+
+## Live Demo
+
+🚀 **Development Environment**: http://aa1e4012f5f7a40958069e83128ba92a-1088395492.ap-southeast-1.elb.amazonaws.com
+
+- **Swagger UI (Interactive API Docs)**: http://aa1e4012f5f7a40958069e83128ba92a-1088395492.ap-southeast-1.elb.amazonaws.com/swagger/
+- **Health Check**: http://aa1e4012f5f7a40958069e83128ba92a-1088395492.ap-southeast-1.elb.amazonaws.com/health
+
+## Deployment
+
+This project supports **automated deployment using Kubernetes and GitHub Actions**:
+
+- **Kubernetes (EKS)**: Production-ready deployment on AWS EKS
+- **CI/CD Pipeline**: Automated testing, building, and deployment via GitHub Actions
+- **Multi-Environment**: Separate dev, staging, and production environments
+- **Auto-Deployment**: Push to branch triggers automatic deployment:
+  - `dev` branch → Development environment
+  - `stage` branch → Staging environment  
+  - `main` branch → Production environment
+- **Infrastructure as Code**: Terraform for infrastructure management
+- **Container Registry**: AWS ECR for Docker image storage
 
 ## Architecture
 
@@ -263,7 +286,6 @@ rate-limiter/
 The rate limiting package (`pkg/ratelimit`) is designed as a **standalone Go library** that can be imported and used independently of the full Viva Rate Limiter system.
 
 ### Why Use Our Package?
-- **Battle-tested**: Used in production handling millions of requests
 - **Flexible**: Choose between memory or Redis backends
 - **Simple API**: Easy to integrate with just a few lines of code
 - **Well-documented**: Comprehensive examples and documentation
@@ -284,6 +306,8 @@ Check out the [examples directory](https://github.com/rdhawladar/viva-rate-limit
 ## Configuration
 
 The application uses environment variables for configuration. Key settings include:
+
+Key settings include:
 
 - `DATABASE_URL`: PostgreSQL connection string
 - `REDIS_URL`: Redis connection string
@@ -369,10 +393,11 @@ Please ensure:
 ## Documentation
 
 Detailed documentation is available in the `docs/` directory:
-- [Architecture Overview](docs/memory_bank/architecture.md)
-- [API Reference](docs/api/)
-- [Development Guide](docs/memory_bank/developerNotes.md)
-- [Deployment Guide](docs/deployment.md)
+- [API Reference](docs/api/) - API endpoints and usage
+- [cURL Examples](docs/api/CURL_EXAMPLES.md) - Complete cURL command reference
+- [Postman Collection](docs/api/Viva_Rate_Limiter_API.postman_collection.json) - Import-ready Postman collection
+- [k6 Performance Testing](k6/README.md) - Load testing documentation
+- [Development Guide](docs/memory_bank/developerNotes.md) - Development best practices
 
 ## License
 
