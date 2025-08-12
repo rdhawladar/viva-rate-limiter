@@ -30,7 +30,7 @@ jobs:
             echo "cluster_name=viva-cluster-stage" >> $GITHUB_OUTPUT
           elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
             echo "environment=prod" >> $GITHUB_OUTPUT
-            echo "cluster_name=viva-cluster-prod" >> $GITHUB_OUTPUT
+            echo "cluster_name=viva-cluster-dev" >> $GITHUB_OUTPUT
           fi
 
   build-and-deploy:
