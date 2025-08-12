@@ -1,0 +1,583 @@
+{
+	"info": {
+		"_postman_id": "viva-rate-limiter-dev",
+		"name": "Viva Rate Limiter API - Development",
+		"description": "Complete API collection for Viva Rate Limiter development environment.\n\nBase URL: http://aa1e4012f5f7a40958069e83128ba92a-1088395492.ap-southeast-1.elb.amazonaws.com\n\nThis collection includes:\n- Health checks\n- API Key management\n- Rate limiting operations\n- Usage tracking\n- Public validation endpoints",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Health & Status",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"health"
+							]
+						},
+						"description": "Check the health status of the API server, database, and Redis connections."
+					},
+					"response": []
+				},
+				{
+					"name": "Readiness Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/ready",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"ready"
+							]
+						},
+						"description": "Check if the API is ready to accept traffic."
+					},
+					"response": []
+				},
+				{
+					"name": "Liveness Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/live",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"live"
+							]
+						},
+						"description": "Check if the API is alive and responding."
+					},
+					"response": []
+				},
+				{
+					"name": "Prometheus Metrics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/metrics",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"metrics"
+							]
+						},
+						"description": "Get Prometheus metrics for monitoring."
+					},
+					"response": []
+				}
+			],
+			"description": "Health checks and system status endpoints"
+		},
+		{
+			"name": "Documentation",
+			"item": [
+				{
+					"name": "Swagger UI",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/swagger/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"swagger",
+								""
+							]
+						},
+						"description": "Access the interactive Swagger UI documentation."
+					},
+					"response": []
+				},
+				{
+					"name": "OpenAPI Spec",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/openapi.yaml",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"openapi.yaml"
+							]
+						},
+						"description": "Get the OpenAPI specification in YAML format."
+					},
+					"response": []
+				}
+			],
+			"description": "API documentation endpoints"
+		},
+		{
+			"name": "API Key Management",
+			"item": [
+				{
+					"name": "Create API Key",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    pm.environment.set('api_key_id', response.id);",
+									"    pm.environment.set('api_key', response.key);",
+									"    console.log('API Key created:', response.key);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test API Key\",\n  \"description\": \"API key for testing purposes\",\n  \"tier\": \"free\",\n  \"rate_limit\": {\n    \"requests\": 1000,\n    \"window\": \"1h\",\n    \"burst\": 10\n  },\n  \"expires_at\": \"2025-12-31T23:59:59Z\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/api-keys/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"api-keys",
+								""
+							]
+						},
+						"description": "Create a new API key with specified rate limits and configuration."
+					},
+					"response": []
+				},
+				{
+					"name": "Get API Key",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/api-keys/{{api_key_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"api-keys",
+								"{{api_key_id}}"
+							]
+						},
+						"description": "Retrieve details of a specific API key."
+					},
+					"response": []
+				},
+				{
+					"name": "List API Keys",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/api-keys/?limit=10&offset=0",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"api-keys",
+								""
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "offset",
+									"value": "0"
+								}
+							]
+						},
+						"description": "List all API keys with pagination."
+					},
+					"response": []
+				},
+				{
+					"name": "Update API Key",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Updated Test API Key\",\n  \"description\": \"Updated description for testing\",\n  \"tier\": \"pro\",\n  \"rate_limit\": {\n    \"requests\": 5000,\n    \"window\": \"1h\",\n    \"burst\": 50\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/api-keys/{{api_key_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"api-keys",
+								"{{api_key_id}}"
+							]
+						},
+						"description": "Update an existing API key's configuration."
+					},
+					"response": []
+				},
+				{
+					"name": "Rotate API Key",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.environment.set('api_key', response.new_key);",
+									"    console.log('API Key rotated:', response.new_key);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/api-keys/{{api_key_id}}/rotate",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"api-keys",
+								"{{api_key_id}}",
+								"rotate"
+							]
+						},
+						"description": "Rotate an API key to generate a new secret."
+					},
+					"response": []
+				},
+				{
+					"name": "Get API Key Stats",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/api-keys/{{api_key_id}}/stats",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"api-keys",
+								"{{api_key_id}}",
+								"stats"
+							]
+						},
+						"description": "Get usage statistics for a specific API key."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete API Key",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/api-keys/{{api_key_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"api-keys",
+								"{{api_key_id}}"
+							]
+						},
+						"description": "Delete an API key permanently."
+					},
+					"response": []
+				}
+			],
+			"description": "API key creation, management, and lifecycle operations"
+		},
+		{
+			"name": "Rate Limiting",
+			"item": [
+				{
+					"name": "Check Rate Limit",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"api_key\": \"{{api_key}}\",\n  \"identifier\": \"user_123\",\n  \"cost\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/rate-limit/check",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"rate-limit",
+								"check"
+							]
+						},
+						"description": "Check if a request is within rate limits."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Rate Limit Info",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/rate-limit/{{api_key_id}}/info",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"rate-limit",
+								"{{api_key_id}}",
+								"info"
+							]
+						},
+						"description": "Get current rate limit status for an API key."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Rate Limit",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"requests\": 2000,\n  \"window\": \"1h\",\n  \"burst\": 20\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/rate-limit/{{api_key_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"rate-limit",
+								"{{api_key_id}}"
+							]
+						},
+						"description": "Update rate limit configuration for an API key."
+					},
+					"response": []
+				},
+				{
+					"name": "Reset Rate Limit",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"identifier\": \"user_123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/rate-limit/{{api_key_id}}/reset",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"rate-limit",
+								"{{api_key_id}}",
+								"reset"
+							]
+						},
+						"description": "Reset rate limit counters for a specific identifier."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Violation History",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/rate-limit/{{api_key_id}}/violations?limit=10&offset=0",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"rate-limit",
+								"{{api_key_id}}",
+								"violations"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "offset",
+									"value": "0"
+								}
+							]
+						},
+						"description": "Get rate limit violation history for an API key."
+					},
+					"response": []
+				}
+			],
+			"description": "Rate limiting operations and monitoring"
+		},
+		{
+			"name": "Public API",
+			"item": [
+				{
+					"name": "Validate API Key",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-API-Key",
+								"value": "{{api_key}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"identifier\": \"user_123\",\n  \"cost\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/public/v1/rate-limit/validate",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"public",
+								"v1",
+								"rate-limit",
+								"validate"
+							]
+						},
+						"description": "Public endpoint to validate API key and check rate limits. This is the endpoint your clients would typically use."
+					},
+					"response": []
+				}
+			],
+			"description": "Public-facing API endpoints for client applications"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://aa1e4012f5f7a40958069e83128ba92a-1088395492.ap-southeast-1.elb.amazonaws.com",
+			"type": "string"
+		},
+		{
+			"key": "api_key_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "api_key",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

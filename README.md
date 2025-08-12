@@ -93,6 +93,28 @@ count, windowStart, err := backend.Increment(ctx, key, window)
 - **Interactive API Documentation**: Built-in Swagger UI for easy API exploration
 - **Observability**: Prometheus metrics, structured logging, and custom alerting
 
+## Live Demo
+
+🚀 **Development Environment**: http://aa1e4012f5f7a40958069e83128ba92a-1088395492.ap-southeast-1.elb.amazonaws.com
+
+- **Swagger UI (Interactive API Docs)**: http://aa1e4012f5f7a40958069e83128ba92a-1088395492.ap-southeast-1.elb.amazonaws.com/swagger/
+- **Health Check**: http://aa1e4012f5f7a40958069e83128ba92a-1088395492.ap-southeast-1.elb.amazonaws.com/health
+- **OpenAPI Spec**: http://aa1e4012f5f7a40958069e83128ba92a-1088395492.ap-southeast-1.elb.amazonaws.com/openapi.yaml
+
+## Deployment
+
+This project supports **automated deployment using Kubernetes and GitHub Actions**:
+
+- **Kubernetes (EKS)**: Production-ready deployment on AWS EKS
+- **CI/CD Pipeline**: Automated testing, building, and deployment via GitHub Actions
+- **Multi-Environment**: Separate dev, staging, and production environments
+- **Auto-Deployment**: Push to branch triggers automatic deployment:
+  - `dev` branch → Development environment
+  - `stage` branch → Staging environment  
+  - `main` branch → Production environment
+- **Infrastructure as Code**: Terraform for infrastructure management
+- **Container Registry**: AWS ECR for Docker image storage
+
 ## Architecture
 
 The system follows a microservices architecture with clean separation of concerns:
@@ -372,6 +394,8 @@ Please ensure:
 
 Detailed documentation is available in the `docs/` directory:
 - [API Reference](docs/api/) - API endpoints and usage
+- [cURL Examples](docs/api/CURL_EXAMPLES.md) - Complete cURL command reference
+- [Postman Collection](docs/api/Viva_Rate_Limiter_API.postman_collection.json) - Import-ready Postman collection
 - [k6 Performance Testing](k6/README.md) - Load testing documentation
 - [Development Guide](docs/memory_bank/developerNotes.md) - Development best practices
 

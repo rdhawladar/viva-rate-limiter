@@ -30,8 +30,10 @@ info:
     url: https://opensource.org/licenses/MIT
 
 servers:
+  - url: http://aa1e4012f5f7a40958069e83128ba92a-1088395492.ap-southeast-1.elb.amazonaws.com
+    description: Development server (AWS EKS)
   - url: http://localhost:8090
-    description: Development server
+    description: Local development server
   - url: https://api.viva-rate-limiter.com
     description: Production server
 
