@@ -30,8 +30,8 @@ WORKDIR /root/
 # Copy binary from builder
 COPY --from=builder /app/main .
 
-# Copy OpenAPI spec
-COPY --from=builder /app/docs/api/openapi.yaml ./docs/
+# Copy OpenAPI spec to correct path
+COPY --from=builder /app/docs/api/openapi.yaml ./docs/api/openapi.yaml
 
 # Expose port
 EXPOSE 8080
