@@ -99,7 +99,6 @@ count, windowStart, err := backend.Increment(ctx, key, window)
 
 - **Swagger UI (Interactive API Docs)**: http://aa1e4012f5f7a40958069e83128ba92a-1088395492.ap-southeast-1.elb.amazonaws.com/swagger/
 - **Health Check**: http://aa1e4012f5f7a40958069e83128ba92a-1088395492.ap-southeast-1.elb.amazonaws.com/health
-- **OpenAPI Spec**: http://aa1e4012f5f7a40958069e83128ba92a-1088395492.ap-southeast-1.elb.amazonaws.com/openapi.yaml
 
 ## Deployment
 
@@ -287,7 +286,6 @@ rate-limiter/
 The rate limiting package (`pkg/ratelimit`) is designed as a **standalone Go library** that can be imported and used independently of the full Viva Rate Limiter system.
 
 ### Why Use Our Package?
-- **Battle-tested**: Used in production handling millions of requests
 - **Flexible**: Choose between memory or Redis backends
 - **Simple API**: Easy to integrate with just a few lines of code
 - **Well-documented**: Comprehensive examples and documentation
@@ -308,6 +306,8 @@ Check out the [examples directory](https://github.com/rdhawladar/viva-rate-limit
 ## Configuration
 
 The application uses environment variables for configuration. Key settings include:
+
+Key settings include:
 
 - `DATABASE_URL`: PostgreSQL connection string
 - `REDIS_URL`: Redis connection string
