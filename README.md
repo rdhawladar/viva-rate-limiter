@@ -371,8 +371,6 @@ Please ensure:
 ## Documentation
 
 Detailed documentation is available in the `docs/` directory:
-- **[System Architecture](docs/ARCHITECTURE.md)** - Complete system design and technical details
-- **[Deployment Guide](docs/DEPLOYMENT.md)** - Comprehensive deployment flow from dev to production
 - [API Reference](docs/api/) - API endpoints and usage
 - [k6 Performance Testing](k6/README.md) - Load testing documentation
 - [Development Guide](docs/memory_bank/developerNotes.md) - Development best practices
