@@ -2,6 +2,7 @@
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/rdhawladar/viva-rate-limiter/pkg/ratelimit.svg)](https://pkg.go.dev/github.com/rdhawladar/viva-rate-limiter/pkg/ratelimit)
 [![Go Report Card](https://goreportcard.com/badge/github.com/rdhawladar/viva-rate-limiter)](https://goreportcard.com/report/github.com/rdhawladar/viva-rate-limiter)
+[![Test Coverage](https://img.shields.io/badge/coverage-3.6%25-yellow)](./coverage/coverage.html)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A production-ready Go-based API key management system with sophisticated rate limiting capabilities, built for high-performance and scalability. **Available as a standalone Go package!**
@@ -201,6 +202,12 @@ go test -v -race ./...
 
 # Run with coverage
 go test -cover ./...
+
+# Generate detailed coverage report
+./scripts/test-coverage.sh
+
+# View coverage report in browser
+open coverage/coverage.html
 ```
 
 ### Code quality
@@ -398,6 +405,7 @@ Detailed documentation is available in the `docs/` directory:
 - [Postman Collection](docs/api/Viva_Rate_Limiter_API.postman_collection.json) - Import-ready Postman collection
 - [k6 Performance Testing](k6/README.md) - Load testing documentation
 - [Development Guide](docs/memory_bank/developerNotes.md) - Development best practices
+- [Test Coverage Report](coverage/coverage.html) - Detailed test coverage analysis
 
 ## License
 

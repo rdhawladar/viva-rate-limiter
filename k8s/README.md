@@ -80,7 +80,7 @@ kubectl apply -f k8s/environments/stage/config.yaml
 # Prod environment (API only, assuming managed DB/Cache)
 kubectl apply -f k8s/environments/prod/namespace.yaml
 kubectl apply -f k8s/base/deployment.yaml -n prod
-kubectl apply -f k8s/environments/prod/config.yaml
+kubectl apply -f k8s/environments/dev/config.yaml
 ```
 
 ## Production Considerations

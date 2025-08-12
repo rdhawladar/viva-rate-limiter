@@ -47,10 +47,29 @@ jobs:
       with:
         go-version: '1.21'
 
-    - name: Run tests
+    - name: Run tests with coverage
       run: |
-        # Exclude problematic packages from tests (scripts, queue, worker)
-        go test $(go list ./... | grep -v '/scripts' | grep -v '/queue' | grep -v '/worker')
+        # Create coverage directory
+        mkdir -p coverage
+        
+        # Run tests with coverage, excluding problematic packages
+        go test \
+          -coverprofile=coverage/coverage.out \
+          -covermode=atomic \
+          -coverpkg=./internal/...,./pkg/... \
+          $(go list ./... | grep -v '/scripts' | grep -v '/queue' | grep -v '/worker')
+        
+        # Generate coverage summary
+        go tool cover -func=coverage/coverage.out | tail -1
+        
+        # Extract coverage percentage for badge
+        COVERAGE=$(go tool cover -func=coverage/coverage.out | tail -1 | awk '{print $3}' | sed 's/%//')
+        echo "COVERAGE_PERCENTAGE=${COVERAGE}" >> $GITHUB_ENV
+        
+        # Generate HTML coverage report (optional)
+        go tool cover -html=coverage/coverage.out -o coverage/coverage.html
+        
+        # Run go vet for code quality
         go vet $(go list ./... | grep -v '/scripts' | grep -v '/queue' | grep -v '/worker')
 
     - name: Configure AWS credentials
