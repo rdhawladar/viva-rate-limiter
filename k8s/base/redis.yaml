@@ -42,4 +42,3 @@ spec:
     - protocol: TCP
       port: 6379
       targetPort: 6379
-EOF < /dev/null

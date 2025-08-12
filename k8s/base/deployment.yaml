@@ -24,6 +24,14 @@ spec:
             name: viva-config
         - secretRef:
             name: viva-secrets
+        volumeMounts:
+        - name: config-volume
+          mountPath: /root/configs
+          readOnly: true
+      volumes:
+      - name: config-volume
+        configMap:
+          name: viva-app-config
 ---
 apiVersion: v1
 kind: Service

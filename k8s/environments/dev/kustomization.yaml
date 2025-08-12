@@ -25,4 +25,3 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/resources/limits/cpu
         value: 200m
-EOF < /dev/null

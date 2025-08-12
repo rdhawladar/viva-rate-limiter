@@ -6,6 +6,8 @@
 
 A production-ready Go-based API key management system with sophisticated rate limiting capabilities, built for high-performance and scalability. **Available as a standalone Go package!**
 
+<!-- Test deployment $(date): GitHub Actions automated deployment test for dev environment -->
+
 ## 🚀 Quick Start - Use as a Go Package
 
 Viva Rate Limiter is available as a **public Go package** that you can easily integrate into your applications:
@@ -369,10 +371,11 @@ Please ensure:
 ## Documentation
 
 Detailed documentation is available in the `docs/` directory:
-- [Architecture Overview](docs/memory_bank/architecture.md)
-- [API Reference](docs/api/)
-- [Development Guide](docs/memory_bank/developerNotes.md)
-- [Deployment Guide](docs/deployment.md)
+- **[System Architecture](docs/ARCHITECTURE.md)** - Complete system design and technical details
+- **[Deployment Guide](docs/DEPLOYMENT.md)** - Comprehensive deployment flow from dev to production
+- [API Reference](docs/api/) - API endpoints and usage
+- [k6 Performance Testing](k6/README.md) - Load testing documentation
+- [Development Guide](docs/memory_bank/developerNotes.md) - Development best practices
 
 ## License
 

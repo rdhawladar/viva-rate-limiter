@@ -17,4 +17,3 @@ type: Opaque
 stringData:
   DATABASE_URL: "postgresql://user:pass@postgres-service.dev.svc.cluster.local:5432/ratelimiter_dev?sslmode=disable"
   REDIS_URL: "redis://redis-service.dev.svc.cluster.local:6379"
-EOF < /dev/null
