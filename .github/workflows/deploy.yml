@@ -90,6 +90,42 @@ jobs:
         # Create config map from k8s-specific config file
         kubectl create configmap viva-app-config --from-file=dev.yaml=configs/k8s-dev.yaml -n $ENVIRONMENT --dry-run=client -o yaml | kubectl apply -f -
         
+        # Copy base files to environment directory to avoid kustomize security restrictions
+        cp k8s/base/*.yaml k8s/environments/$ENVIRONMENT/
+        
+        # Update kustomization.yaml to reference local files
+        cd k8s/environments/$ENVIRONMENT/
+        cat > kustomization.yaml << EOF
+        apiVersion: kustomize.config.k8s.io/v1beta1
+        kind: Kustomization
+        
+        namespace: $ENVIRONMENT
+        
+        resources:
+          - namespace.yaml
+          - config.yaml
+          - deployment.yaml
+          - postgres.yaml
+          - redis.yaml
+        
+        replicas:
+          - name: viva-api
+            count: 1
+        
+        patches:
+          - target:
+              kind: Deployment
+              name: viva-api
+            patch: |-
+              - op: replace
+                path: /spec/template/spec/containers/0/resources/limits/memory
+                value: 256Mi
+              - op: replace
+                path: /spec/template/spec/containers/0/resources/limits/cpu
+                value: 200m
+        EOF
+        cd ../../..
+        
         # Apply all resources using kustomize
         kubectl apply -k k8s/environments/$ENVIRONMENT/
         
